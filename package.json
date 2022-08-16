@@ -7,13 +7,18 @@
   "author": "nullableVoidPtr <30564701+nullableVoidPtr@users.noreply.github.com>",
   "license": "MIT",
   "devDependencies": {
+    "@babel/types": "^7.18.10",
+    "@types/babel__core": "^7.1.19",
+    "@types/babel__traverse": "^7.18.0",
+    "@types/nearley": "^2.11.2",
     "nearley": "^2.20.1",
     "typescript": "^4.7.4"
   },
   "dependencies": {
-    "@babel/core": "^7.18.10"
+    "@babel/core": "^7.18.10",
+    "@babel/traverse": "^7.18.11"
   },
   "scripts": {
-    "build-parser": "nearleyc src/grammar.ne --out src/grammar.js"
+    "build-parser": "nearleyc src/grammar.ne --out src/grammar.ts"
   }
 }

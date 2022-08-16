@@ -1,0 +1,264 @@
+import * as nearley from 'nearley';
+import SelectorGrammar from './grammar';
+import {Selector} from './selector';
+import { NodePath } from '@babel/traverse';
+import * as babel from '@babel/core';
+import * as t from '@babel/types';
+
+export function parse(selector: string): Selector {
+    const parser = new nearley.Parser(
+        nearley.Grammar.fromCompiled(SelectorGrammar as any)
+    );
+
+    try {
+        parser.feed(selector);
+    } catch (parseError: any) {
+        throw new Error(`Error at character ${parseError.offset}`);
+    }
+
+    if (parser.results.length === 0) {
+        throw new Error(`Unexpected end of input`);
+    }
+
+    return parser.results[0];
+}
+
+export interface QueryOptions {
+}
+
+function matches(path: NodePath, selector: Selector, options: QueryOptions, root?: NodePath): boolean {
+    if (!root) {
+        root = path;
+    }
+
+    switch (selector.type) {
+        case 'wildcard':
+            return true;
+        case 'type':
+            return path.type === selector.name;
+        case 'list':
+            return selector.list.some(
+                s => matches(path, s, options, root)
+            );
+        case 'compound':
+            return selector.list.every(
+                s => matches(path, s, options, root)
+            );
+        case 'complex':
+            switch (selector.combinator) {
+                case 'sibling':
+                    const prevSiblings = path.getAllPrevSiblings();
+                    return prevSiblings.length !== 0 &&
+                        matches(path, selector.right, options, root) &&
+                        prevSiblings.some(
+                            p => matches(p, selector.left, options, root)
+                        );
+                case 'adjacent':
+                    const prevSibling = path.getPrevSibling();
+                    return prevSibling &&
+                        matches(path, selector.right, options, root) &&
+                        matches(prevSibling, selector.left, options, root);
+                case 'child':
+                    const parentPath = path.parentPath;
+                    return parentPath !== null &&
+                        matches(path, selector.right, options, root) &&
+                        matches(parentPath, selector.left, options, root);
+                case 'descendant':
+                    const ancestry = path.getAncestry().slice(1);
+                    return ancestry.length !== 0 &&
+                        matches(path, selector.right, options, root) &&
+                        ancestry.some(
+                            p => matches(p, selector.left, options, root)
+                        );
+            }
+        case 'root':
+            return path === root;
+        case 'class':
+            switch (selector.name) {
+                case 'statement':
+                    return path.isStatement();
+                case 'expression':
+                    return path.isExpression();
+                case 'declaration':
+                    return path.isDeclaration();
+                case 'function':
+                    return path.isFunction();
+                case 'pattern':
+                    return path.isPattern();
+                case 'scope':
+                    return path.isScope();
+            }
+        case 'only-child':
+            return path.inList && (path.container as object[]).length === 1;
+        case 'not':
+            return !matches(path, selector, options);
+        case 'is':
+            return matches(path, selector, options);
+        case 'has':
+            return selector.list.some(s => {
+                switch (s.combinator) {
+                    case 'sibling':
+                        const nextSiblings = path.getAllNextSiblings();
+                        return nextSiblings.length !== 0 &&
+                            nextSiblings.some(
+                                p => matches(p, s.selector, options, root)
+                            );
+                    case 'adjacent':
+                        const nextSibling = path.getNextSibling();
+                        return nextSibling &&
+                            matches(nextSibling, s.selector, options, root);
+                    case 'child':
+                    case 'descendant':
+                        let matched = false;
+                        path.traverse({
+                            enter(p) {
+                                if (s.combinator === 'child') {
+                                    path.skip();
+                                }
+
+                                if (matches(p, s.selector, options, root)) {
+                                    matched = true;
+                                    path.stop();
+                                }
+                            }
+                        });
+                        return matched;
+                }
+            });
+        case 'ancestry':
+            if (!matches(path, selector.subject, options, root)) {
+                return false;
+            }
+
+            const ancestry = path.getAncestry();
+            let current: NodePath | NodePath[] | undefined = ancestry.at(selector.path.length);
+            if (!current) return false;
+
+            for (const {key, specifier} of selector.path) {
+                if (Array.isArray(current) && typeof key === 'number') {
+                    current = current[key];
+                } else if (typeof key === 'string') {
+                    current = path.get(key);
+                } else {
+                    return false;
+                }
+
+                if (!current) {
+                    return false;
+                }
+
+                if (!Array.isArray(current)) {
+                    if (!current.node) {
+                        return false;
+                    }
+
+                    if (specifier !== null && !matches(current, specifier, options)) {
+                        return false;
+                    }
+                }
+            }
+
+            return !Array.isArray(current);
+        case 'nth-child':
+            if (!path.inList) {
+                return false;
+            }
+
+            const index = path.key as number;
+            const expected = selector.index;
+            if (expected.multiplier > 0) {
+                return (index - expected.offset) % expected.multiplier === 0;
+            } else if (expected.multiplier < 0) {
+                return (index + expected.offset) % expected.multiplier === 0;
+            }
+
+            return expected.offset === index;
+        case 'attribute':
+            let value: any = path.node;
+            for (const key of selector.names) {
+                if (!(key in value)) {
+                    return false;
+                }
+
+                value = value[key];
+            }
+
+            if (!selector.operator) {
+                return !!value;
+            }
+
+            const right = selector.right!;
+            if (typeof right === 'object') {
+                if (typeof value !== 'string') {
+                    return false;
+                }
+                const match = right.test(value);
+                switch (selector.operator) {
+                    case '=':
+                        return match;
+                    case '!=':
+                        return !match;
+                    default:
+                        throw new Error(`unexpected binary operator ${selector.operator}`)
+                }
+            }
+
+            if (typeof value !== typeof right) {
+                return false;
+            }
+
+            switch (selector.operator) {
+                case '=':
+                    return value === right; 
+                case '!=':
+                    return value !== right; 
+                case '>':
+                    return value > right; 
+                case '<':
+                    return value < right; 
+                case '>=':
+                    return value >= right; 
+                case '<=':
+                    return value <= right; 
+                case '^=':
+                    if (typeof value !== 'string') {
+                        return false;
+                    }
+
+                    return value.startsWith(right as string);
+                case '$=':
+                    if (typeof value !== 'string') {
+                        return false;
+                    }
+
+                    return value.endsWith(right as string);
+                case '*=':
+                    if (typeof value !== 'string') {
+                        return false;
+                    }
+
+                    return value.includes(right as string);
+            }
+    }
+}
+
+export function traverse(path: NodePath, selector: Selector, visitor: (path: NodePath) => void, options: QueryOptions) {
+    path.traverse({
+        enter(current) {
+            if (matches(current, selector, options)) {
+                visitor(current);
+            }
+        }
+    });
+}
+
+export function query(path: NodePath, selector: string | Selector, options?: QueryOptions): NodePath[] {
+    if (typeof selector === 'string') {
+        selector = parse(selector);
+    }
+
+    const matches: NodePath[] = [];
+    traverse(path, selector, (path) => matches.push(path), options ?? {});
+
+    return matches;
+}
