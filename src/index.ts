@@ -1,9 +1,7 @@
 import * as nearley from 'nearley';
 import SelectorGrammar from './grammar';
-import {Selector} from './selector';
+import { Selector } from './selector';
 import { NodePath } from '@babel/traverse';
-import * as babel from '@babel/core';
-import * as t from '@babel/types';
 
 export function parse(selector: string): Selector {
     const parser = new nearley.Parser(
@@ -131,34 +129,45 @@ function matches(path: NodePath, selector: Selector, options: QueryOptions, root
             }
 
             const ancestry = path.getAncestry();
-            let current: NodePath | NodePath[] | undefined = ancestry.at(selector.path.length);
-            if (!current) return false;
 
-            for (const {key, specifier} of selector.path) {
-                if (Array.isArray(current) && typeof key === 'number') {
-                    current = current[key];
-                } else if (typeof key === 'string') {
-                    current = path.get(key);
-                } else {
+            let pathI = selector.path.length - 1;
+            for (let i = 0; i < ancestry.length; i++) {
+                const currentNodePath = ancestry[i];
+                let {key, specifier} = selector.path[pathI];
+
+                if (currentNodePath.key !== key) {
+                    return false;
+                }
+                if (specifier &&
+                    !matches(currentNodePath, specifier, options, root)) {
                     return false;
                 }
 
-                if (!current) {
-                    return false;
+                if (--pathI <= 0) {
+                    return true;
                 }
 
-                if (!Array.isArray(current)) {
-                    if (!current.node) {
+
+                if (typeof key === 'number') {
+                    if (selector.path[pathI].specifier) {
                         return false;
                     }
 
-                    if (specifier !== null && !matches(current, specifier, options)) {
+                    if (!currentNodePath.inList) {
                         return false;
+                    }
+
+                    if (currentNodePath.listKey !== selector.path[pathI].key) {
+                        return false;
+                    }
+
+                    if (--pathI <= 0) {
+                        return true;
                     }
                 }
             }
 
-            return !Array.isArray(current);
+            return true;
         case 'nth-child':
             if (!path.inList) {
                 return false;
@@ -245,7 +254,7 @@ function matches(path: NodePath, selector: Selector, options: QueryOptions, root
 export function traverse(path: NodePath, selector: Selector, visitor: (path: NodePath) => void, options: QueryOptions) {
     path.traverse({
         enter(current) {
-            if (matches(current, selector, options)) {
+            if (matches(current, selector, options, path)) {
                 visitor(current);
             }
         }

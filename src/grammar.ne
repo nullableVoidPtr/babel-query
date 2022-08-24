@@ -83,7 +83,7 @@ sequence -> startAtom:? specifierAtom:* {%
 %}
 
 field -> "." (number | identifier) {%
-	d => d[1]
+	d => d[1][0]
 %}
 
 sequence -> sequence:? field specifierAtom:* {%
@@ -130,7 +130,7 @@ specifierAtom -> (attr | pseudoSelector) {%
 	d => d[0][0]
 %}
 
-wildcard -> "*" {% d => ({type: 'wildcard'}) %}
+wildcard -> "*" {% () => ({type: 'wildcard'}) %}
 
 identifier -> [_a-zA-Z] [_a-zA-Z0-9-]:* {% d => d[0] + d[1].join("") %}
 
@@ -215,7 +215,7 @@ pseudoSelector -> ":" (
 ) {% d => d[1][0] %}
 
 root -> "root" {%
-	d => ({
+	() => ({
 		type: "root",
 	})
 %}
@@ -311,7 +311,7 @@ relativeSelector -> relativeCombinator:? selector {%
 %}
 
 logicalSelector -> "has" "(" _ relativeSelector (_ "," _ relativeSelector):* _ ")" {%
-	(d, _, reject) => {
+	(d) => {
 		const list: {
 			combinator: any;
 			selector: any;
@@ -346,13 +346,13 @@ logicalSelector -> "not" "(" _ selectors _ ")" {%
 %}
 
 firstChild -> "first-child" {%
-	d => ({
+	() => ({
 		type: 'nth-child',
 		index: 1
 	})
 %}
 lastChild -> "last-child" {%
-	d => ({
+	() => ({
 		type: 'nth-child',
 		index: -1
 	})
@@ -370,7 +370,7 @@ nthLastChild -> "nth-last-child(" nthExpr ")" {%
 	})
 %}
 onlyChild -> "only-child" {%
-	d => ({
+	() => ({
 		type: 'only-child',
 	})
 %}

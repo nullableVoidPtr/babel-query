@@ -119,7 +119,7 @@ const grammar: Grammar = {
     {"name": "field$subexpression$1", "symbols": ["number"]},
     {"name": "field$subexpression$1", "symbols": ["identifier"]},
     {"name": "field", "symbols": [{"literal":"."}, "field$subexpression$1"], "postprocess": 
-        d => d[1]
+        d => d[1][0]
         },
     {"name": "sequence$ebnf$3", "symbols": ["sequence"], "postprocess": id},
     {"name": "sequence$ebnf$3", "symbols": [], "postprocess": () => null},
@@ -168,7 +168,7 @@ const grammar: Grammar = {
     {"name": "specifierAtom", "symbols": ["specifierAtom$subexpression$1"], "postprocess": 
         d => d[0][0]
         },
-    {"name": "wildcard", "symbols": [{"literal":"*"}], "postprocess": d => ({type: 'wildcard'})},
+    {"name": "wildcard", "symbols": [{"literal":"*"}], "postprocess": () => ({type: 'wildcard'})},
     {"name": "identifier$ebnf$1", "symbols": []},
     {"name": "identifier$ebnf$1", "symbols": ["identifier$ebnf$1", /[_a-zA-Z0-9-]/], "postprocess": (d) => d[0].concat([d[1]])},
     {"name": "identifier", "symbols": [/[_a-zA-Z]/, "identifier$ebnf$1"], "postprocess": d => d[0] + d[1].join("")},
@@ -287,7 +287,7 @@ const grammar: Grammar = {
     {"name": "pseudoSelector", "symbols": [{"literal":":"}, "pseudoSelector$subexpression$1"], "postprocess": d => d[1][0]},
     {"name": "root$string$1", "symbols": [{"literal":"r"}, {"literal":"o"}, {"literal":"o"}, {"literal":"t"}], "postprocess": (d) => d.join('')},
     {"name": "root", "symbols": ["root$string$1"], "postprocess": 
-        d => ({
+        () => ({
         	type: "root",
         })
         },
@@ -403,7 +403,7 @@ const grammar: Grammar = {
     {"name": "logicalSelector$ebnf$1$subexpression$1", "symbols": ["_", {"literal":","}, "_", "relativeSelector"]},
     {"name": "logicalSelector$ebnf$1", "symbols": ["logicalSelector$ebnf$1", "logicalSelector$ebnf$1$subexpression$1"], "postprocess": (d) => d[0].concat([d[1]])},
     {"name": "logicalSelector", "symbols": ["logicalSelector$string$1", {"literal":"("}, "_", "relativeSelector", "logicalSelector$ebnf$1", "_", {"literal":")"}], "postprocess": 
-        (d, _, reject) => {
+        (d) => {
         	const list: {
         		combinator: any;
         		selector: any;
@@ -439,14 +439,14 @@ const grammar: Grammar = {
         },
     {"name": "firstChild$string$1", "symbols": [{"literal":"f"}, {"literal":"i"}, {"literal":"r"}, {"literal":"s"}, {"literal":"t"}, {"literal":"-"}, {"literal":"c"}, {"literal":"h"}, {"literal":"i"}, {"literal":"l"}, {"literal":"d"}], "postprocess": (d) => d.join('')},
     {"name": "firstChild", "symbols": ["firstChild$string$1"], "postprocess": 
-        d => ({
+        () => ({
         	type: 'nth-child',
         	index: 1
         })
         },
     {"name": "lastChild$string$1", "symbols": [{"literal":"l"}, {"literal":"a"}, {"literal":"s"}, {"literal":"t"}, {"literal":"-"}, {"literal":"c"}, {"literal":"h"}, {"literal":"i"}, {"literal":"l"}, {"literal":"d"}], "postprocess": (d) => d.join('')},
     {"name": "lastChild", "symbols": ["lastChild$string$1"], "postprocess": 
-        d => ({
+        () => ({
         	type: 'nth-child',
         	index: -1
         })
@@ -467,7 +467,7 @@ const grammar: Grammar = {
         },
     {"name": "onlyChild$string$1", "symbols": [{"literal":"o"}, {"literal":"n"}, {"literal":"l"}, {"literal":"y"}, {"literal":"-"}, {"literal":"c"}, {"literal":"h"}, {"literal":"i"}, {"literal":"l"}, {"literal":"d"}], "postprocess": (d) => d.join('')},
     {"name": "onlyChild", "symbols": ["onlyChild$string$1"], "postprocess": 
-        d => ({
+        () => ({
         	type: 'only-child',
         })
         }

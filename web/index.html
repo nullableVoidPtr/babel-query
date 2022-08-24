@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>babel-query demo site</title>
+    <link rel="stylesheet" href="static/style.scss" />
+  </head>
+  <body>
+    <div id="container">
+      <div id="main">
+        <div id="javascript-editor"></div>
+        <div id="results">
+          <div id="selector-ast"></div>
+          <div id="query-matches"></div>
+        </div>
+      </div>
+      <div id="query-editor">
+      </div>
+    </div>
+    <script type="module">
+      import { Buffer } from 'buffer';
+      window.Buffer = Buffer;
+    </script>
+    <script type="module" src="src/main.ts"></script>
+  </body>
+</html>

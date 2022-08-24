@@ -2,8 +2,10 @@
   "name": "babel-query",
   "version": "0.0.1",
   "description": "@babel/traverse compatible esquery port",
-  "main": "index.js",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "repository": "https://github.com/nullableVoidPtr/babel-query",
+  "type": "module",
   "author": "nullableVoidPtr <30564701+nullableVoidPtr@users.noreply.github.com>",
   "license": "MIT",
   "devDependencies": {

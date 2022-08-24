@@ -1,5 +1,3 @@
-import { CompiledRules } from "nearley";
-
 export type CombinatorType  = "sibling" | "adjacent" | "child" | "descendant";
 
 export interface ListSelector {

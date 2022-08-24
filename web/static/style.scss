@@ -1,0 +1,123 @@
+html {
+    height: 100%;
+}
+body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+}
+
+#container {
+    height: 100%;
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+    background-color: #1e1e1e;
+    color: white;
+}
+
+#main {
+    flex: 1;
+    display: flex;
+    flex-direction: row;
+    overflow-y: hidden;
+}
+
+#javascript-editor {
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    flex: 0 0 50%;
+}
+
+#results {
+    flex: 0 0 50%;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+    font-family: "Droid Sans Mono", "monospace", monospace;
+    font-size: 14px;
+    font-feature-settings: "liga" 0, "calt" 0;
+    line-height: 19px;
+    letter-spacing: 0px;
+    color: gray;
+    > * {
+        flex: 1;
+        overflow: scroll;
+        + * {
+            border-top: solid 1px #383838;
+        }
+    }
+}
+
+#query-editor {
+    display: flex;
+    height: 20px;
+    flex-basis: auto;
+    margin: 3px;
+    border-top: solid 1px #383838;
+}
+
+#selector-ast, #query-matches {
+    p {
+        margin-top: 0;
+        margin-bottom: 0;
+    }
+
+    span.terminal {
+        color: white;
+
+        &.string {
+            color: #ce9178;
+        }
+
+        &.number {
+            color: #b5cea8;
+        }
+    }
+
+    span.type {
+        color: #569cd6;
+    }
+
+    > details > summary {
+        margin-left: 5px;
+    }
+
+    details {
+        > summary { 
+            cursor: pointer;
+        }
+
+        > details > summary {
+            margin-left: -0.9em;
+        }
+
+        > :not(summary) {
+            margin-left: 2em;
+        }
+
+        .property {
+            --prelude: attr(data-key) ": " ;
+            position: relative;
+            display: block;
+            
+            > p {
+                display: inline-block;
+            }
+            &:not(details)::before {
+                color: gray;
+                content: var(--prelude);
+            }
+
+            &:is(details) > summary::before {
+                color: gray;
+                content: var(--prelude);
+            }
+        }
+    }
+}
+
+.highlighted {
+    background-color: #fff00040;
+}
