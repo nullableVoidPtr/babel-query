@@ -1,17 +1,34 @@
 import { defineConfig } from 'vite';
-import { viteCommonjs } from '@originjs/vite-plugin-commonjs'
 import monacoEditorPlugin from 'vite-plugin-monaco-editor';
 
 export default defineConfig({
   plugins: [
-    viteCommonjs(),
-    (monacoEditorPlugin as any).default({}),
+    (monacoEditorPlugin as any).default({
+      languageWorkers: ["editorWorkerService", "typescript"],
+    }),
   ],
   define: {
     "process.env": {},
     "process.platform": "'browser'",
+    "Buffer.isBuffer": "(() => false)",
   },
   build: {
-    sourcemap: true,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes("@babel")) {
+            return "babel";
+          }
+
+          if (id.includes("monaco-editor")) {
+            return "monaco";
+          }
+
+          if (id.includes("node_modules")) {
+            return "vendor";
+          }
+        },
+      },
+    },
   },
 });

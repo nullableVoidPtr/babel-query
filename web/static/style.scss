@@ -59,6 +59,8 @@ body {
 }
 
 #selector-ast, #query-matches {
+    padding-left: 0.5em;
+
     p {
         margin-top: 0;
         margin-bottom: 0;
@@ -80,8 +82,8 @@ body {
         color: #569cd6;
     }
 
-    > details > summary {
-        margin-left: 5px;
+    > details > :not(summary) {
+        margin-left: 0.9em;
     }
 
     details {
@@ -94,23 +96,22 @@ body {
         }
 
         > :not(summary) {
-            margin-left: 2em;
+            border-left: solid 0.05em #383838;
+            padding-left: 2.35em;
         }
 
         .property {
-            --prelude: attr(data-key) ": " ;
+            --prelude: attr(data-key) ":" ;
             position: relative;
             display: block;
             
             > p {
                 display: inline-block;
             }
-            &:not(details)::before {
-                color: gray;
-                content: var(--prelude);
-            }
 
-            &:is(details) > summary::before {
+            &:not(details)::before, &:is(details) > summary::before {
+                display: inline-block;
+                margin-right: 0.6em;
                 color: gray;
                 content: var(--prelude);
             }
