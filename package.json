@@ -1,5 +1,5 @@
 {
-  "name": "babel-query",
+  "name": "babelquery",
   "version": "0.0.1",
   "description": "@babel/traverse compatible esquery port",
   "main": "./dist/index.js",
@@ -23,5 +23,7 @@
     "build": "tsc",
     "build-parser": "nearleyc src/grammar.ne --out src/grammar.ts"
   },
-  "files": ["/dist"]
+  "files": [
+    "/dist"
+  ]
 }

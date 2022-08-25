@@ -1,7 +1,7 @@
 import { monaco } from "./monaco";
 import { parse } from "@babel/parser";
 import traverse, { NodePath } from "@babel/traverse";
-import * as babel_query from "babel-query";
+import * as babel_query from "babelquery";
 import { renderQuery, renderESNode } from "./render";
 
 monaco.languages.register({ id: "babelQuery" });

@@ -1,4 +1,4 @@
-babel-query queries a Babylon AST using a `esquery`-style syntax to define syntactic filters, and returning `@babel/traverse`-ready `NodePath`s.
+babelquery queries a Babylon AST using a `esquery`-style syntax to define syntactic filters, and returning `@babel/traverse`-ready `NodePath`s.
 
 Selector types:
 
