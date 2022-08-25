@@ -21,6 +21,7 @@
   },
   "scripts": {
     "build": "tsc",
+    "prepublishOnly": "npm run build",
     "build-parser": "nearleyc src/grammar.ne --out src/grammar.ts"
   },
   "files": [
