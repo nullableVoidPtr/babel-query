@@ -1,7 +1,7 @@
 import { monaco } from "./monaco";
 import { parse } from "@babel/parser";
 import traverse, { NodePath } from "@babel/traverse";
-import * as babel_query from "babelquery";
+import * as babylon_query from "babylon-query";
 import { renderQuery, renderESNode } from "./render";
 
 monaco.languages.register({ id: "babelQuery" });
@@ -96,7 +96,7 @@ const queryResultContainer = document.querySelector("#selector-ast")!;
 const queryMatchesContainer = document.querySelector("#query-matches")!;
 function onQueryChange() {
   const rawQuery = queryEditor.getModel()!.getLineContent(1);
-  const query = babel_query.parse(rawQuery);
+  const query = babylon_query.parse(rawQuery);
   console.log(query);
 
   const rendered = renderQuery(query);
@@ -108,7 +108,7 @@ function onQueryChange() {
   let results: NodePath[] | undefined;
   (import.meta.env.DEV ? traverse : (traverse as any).default)(parsed, {
     Program(path: NodePath) {
-      results = babel_query.query(path, query);
+      results = babylon_query.query(path, query);
       path.stop();
     },
   });

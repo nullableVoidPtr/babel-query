@@ -1,5 +1,5 @@
 {
-  "name": "babelquery",
+  "name": "babylon-query",
   "version": "0.0.1",
   "description": "@babel/traverse compatible esquery port",
   "main": "./dist/index.js",
