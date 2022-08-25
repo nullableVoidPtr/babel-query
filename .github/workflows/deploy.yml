@@ -1,0 +1,43 @@
+name: Deploy Pages
+on:
+  push:
+    branches:
+    - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v1
+      with:
+        node-version: 16
+        cache: 'yarn'
+        cache-dependency-path: |
+          yarn.lock
+          web/yarn.lock
+    - run: |
+          yarn install --frozen-lockfile
+          yarn link
+          cd web/
+          yarn install --frozen-lockfile
+          yarn link "babylon-query"
+          yarn run build
+    - uses: actions/upload-artifact@v2
+      with:
+        name: production-files
+        path: ./dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+    - uses: actions/download-artifact@v3
+      with:
+        name: production-files
+        path: ./dist
+    - uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./dist

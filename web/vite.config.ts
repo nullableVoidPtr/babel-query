@@ -7,6 +7,7 @@ export default defineConfig({
       languageWorkers: ["editorWorkerService", "typescript"],
     }),
   ],
+  base: '/babylon-query/',
   define: {
     "process.env": {},
     "process.platform": "'browser'",
