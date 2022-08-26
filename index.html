@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <script>self["MonacoEnvironment"] = (function (paths) {
+          return {
+            globalAPI: false,
+            getWorkerUrl : function (moduleId, label) {
+              var result =  paths[label];
+              if (/^((http:)|(https:)|(file:)|(\/\/))/.test(result)) {
+                var currentUrl = String(window.location);
+                var currentOrigin = currentUrl.substr(0, currentUrl.length - window.location.hash.length - window.location.search.length - window.location.pathname.length);
+                if (result.substring(0, currentOrigin.length) !== currentOrigin) {
+                  var js = '/*' + label + '*/importScripts("' + result + '");';
+                  var blob = new Blob([js], { type: 'application/javascript' });
+                  return URL.createObjectURL(blob);
+                }
+              }
+              return result;
+            }
+          };
+        })({
+  "editorWorkerService": "/babylon-query/monacoeditorwork/editor.worker.bundle.js",
+  "typescript": "/babylon-query/monacoeditorwork/ts.worker.bundle.js",
+  "javascript": "/babylon-query/monacoeditorwork/ts.worker.bundle.js"
+});</script>
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>babel-query demo site</title>
+    
+    <script type="module" crossorigin src="/babylon-query/assets/index.e72161aa.js"></script>
+    <link rel="modulepreload" crossorigin href="/babylon-query/assets/monaco.aebca184.js">
+    <link rel="modulepreload" crossorigin href="/babylon-query/assets/vendor.85f9fc92.js">
+    <link rel="modulepreload" crossorigin href="/babylon-query/assets/babel.2f7440ce.js">
+    <link rel="stylesheet" href="/babylon-query/assets/monaco.1f4206fe.css">
+    <link rel="stylesheet" href="/babylon-query/assets/index.4f46c940.css">
+  </head>
+  <body>
+    <div id="container">
+      <div id="main">
+        <div id="javascript-editor"></div>
+        <div id="results">
+          <div id="selector-ast"></div>
+          <div id="query-matches"></div>
+        </div>
+      </div>
+      <div id="query-editor">
+      </div>
+    </div>
+    
+  </body>
+</html>
