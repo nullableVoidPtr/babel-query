@@ -4,8 +4,6 @@ import { Selector } from './selector.js';
 import { Node } from '@babel/types';
 import babel_traverse, { NodePath, Scope, TraverseOptions } from '@babel/traverse';
 
-console.log(babel_traverse);
-
 export function parse(selector: string): Selector {
     const parser = new nearley.Parser(
         nearley.Grammar.fromCompiled(SelectorGrammar as any)
@@ -69,6 +67,9 @@ function matches(path: NodePath, selector: Selector, options: QueryOptions, root
                         matches(parentPath, selector.left, options, root);
                 case 'descendant':
                     const ancestry = path.getAncestry().slice(1);
+                    if (matches(path, selector.right, options, root)) {
+                        console.log(selector, ancestry)
+                    }
                     return ancestry.length !== 0 &&
                         matches(path, selector.right, options, root) &&
                         ancestry.some(
@@ -95,9 +96,9 @@ function matches(path: NodePath, selector: Selector, options: QueryOptions, root
         case 'only-child':
             return path.inList && (path.container as object[]).length === 1;
         case 'not':
-            return !matches(path, selector, options);
+            return !matches(path, selector.argument, options);
         case 'is':
-            return matches(path, selector, options);
+            return matches(path, selector.argument, options);
         case 'has':
             return selector.list.some(s => {
                 switch (s.combinator) {
@@ -117,12 +118,12 @@ function matches(path: NodePath, selector: Selector, options: QueryOptions, root
                         path.traverse({
                             enter(p) {
                                 if (s.combinator === 'child') {
-                                    path.skip();
+                                    p.skip();
                                 }
 
                                 if (matches(p, s.selector, options, root)) {
                                     matched = true;
-                                    path.stop();
+                                    p.stop();
                                 }
                             }
                         });
@@ -149,7 +150,7 @@ function matches(path: NodePath, selector: Selector, options: QueryOptions, root
                     return false;
                 }
 
-                if (--pathI <= 0) {
+                if (--pathI < 0) {
                     return true;
                 }
 
@@ -167,7 +168,7 @@ function matches(path: NodePath, selector: Selector, options: QueryOptions, root
                         return false;
                     }
 
-                    if (--pathI <= 0) {
+                    if (--pathI < 0) {
                         return true;
                     }
                 }

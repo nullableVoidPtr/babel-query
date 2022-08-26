@@ -39,7 +39,7 @@ monaco.languages.setMonarchTokensProvider("babelQuery", {
 
 const queryEditorContainer = document.getElementById("query-editor")!;
 const queryEditor = monaco.editor.create(queryEditorContainer, {
-  value: "[id.name='bar']",
+  value: ":function[id.name='foo'] IfStatement ExpressionStatement.consequent:is(BlockStatement).body.1 CallExpression:has(> Identifier[name='baz'])",
   language: "babelQuery",
   theme: "vs-dark",
   wordWrap: "off",
@@ -65,19 +65,13 @@ const queryEditor = monaco.editor.create(queryEditorContainer, {
 
 const javascriptEditorContainer = document.getElementById("javascript-editor")!;
 const javascriptEditor = monaco.editor.create(javascriptEditorContainer, {
-  value: `var x = 1;
-var y = 2;
-function bar() {
-    if (x < y) {
-        foo();
-    } else {
-        x = y;
-        return;
+  value: `function foo() {
+    bar = baz();
+    xyzzy = baz();
+    if (bar) {
+        bar = baz();
+        xyzzy = baz();
     }
-    for (var i = 0; i < 2; i++) {
-        x += i;
-    }
-    bar();
 }`,
   language: "javascript",
   theme: "vs-dark",
@@ -125,9 +119,9 @@ function onQueryChange() {
             {
               range: new monaco.Range(
                 start.line,
-                start.column,
+                start.column + 1,
                 end.line,
-                end.column
+                end.column + 1,
               ),
               options: {
                 inlineClassName: "highlighted",
