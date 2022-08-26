@@ -1,6 +1,6 @@
 {
   "name": "babylon-query",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "@babel/traverse compatible esquery port",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -13,8 +13,10 @@
     "@types/babel__core": "^7.1.19",
     "@types/babel__traverse": "^7.18.0",
     "@types/nearley": "^2.11.2",
-    "nearley": "^2.20.1",
     "typescript": "^4.7.4"
+  },
+  "dependencies": {
+    "nearley": "^2.20.1"
   },
   "peerDependencies": {
     "@babel/traverse": "^7.0.0"
