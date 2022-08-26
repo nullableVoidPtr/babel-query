@@ -18,6 +18,7 @@ jobs:
           web/yarn.lock
     - run: |
           yarn install --frozen-lockfile
+          yarn run build
           yarn link
           cd web/
           yarn install --frozen-lockfile

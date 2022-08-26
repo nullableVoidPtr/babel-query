@@ -1,6 +1,6 @@
 import * as nearley from 'nearley';
-import SelectorGrammar from './grammar';
-import { Selector } from './selector';
+import SelectorGrammar from './grammar.js';
+import { Selector } from './selector.js';
 import { NodePath } from '@babel/traverse';
 
 export function parse(selector: string): Selector {
