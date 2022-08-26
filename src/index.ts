@@ -1,7 +1,10 @@
 import * as nearley from 'nearley';
 import SelectorGrammar from './grammar.js';
 import { Selector } from './selector.js';
-import { NodePath } from '@babel/traverse';
+import { Node } from '@babel/types';
+import babel_traverse, { NodePath, Scope, TraverseOptions } from '@babel/traverse';
+
+console.log(babel_traverse);
 
 export function parse(selector: string): Selector {
     const parser = new nearley.Parser(
@@ -22,6 +25,9 @@ export function parse(selector: string): Selector {
 }
 
 export interface QueryOptions {
+    scope?: Scope;
+    noScope?: boolean;
+    denylist?: (Node["type"])[];
 }
 
 function matches(path: NodePath, selector: Selector, options: QueryOptions, root?: NodePath): boolean {
@@ -251,23 +257,69 @@ function matches(path: NodePath, selector: Selector, options: QueryOptions, root
     }
 }
 
-export function traverse(path: NodePath, selector: Selector, visitor: (path: NodePath) => void, options: QueryOptions) {
-    path.traverse({
-        enter(current) {
-            if (matches(current, selector, options, path)) {
-                visitor(current);
-            }
+export function traverse(
+    node: NodePath | Node,
+    selector: Selector,
+    visitor: (path: NodePath) => void,
+    options?: QueryOptions,
+    scope?: Scope,
+    parentPath?: NodePath,
+) {
+    const traverseOptions: TraverseOptions = {};
+
+    if (!options) {
+        options = {};
+    } else {
+        if ('scope' in options) {
+            traverseOptions.scope = options.scope;
         }
-    });
+        if ('noScope' in options) {
+            traverseOptions.noScope = options.noScope;
+        }
+        if ('denylist' in options) {
+            traverseOptions.denylist = options.denylist;
+        }
+    }
+
+
+    if ('parentPath' in node) {
+        node.traverse({
+            enter(current: NodePath) {
+                if (matches(current, selector, options ?? {}, node)) {
+                    visitor(current);
+                }
+            },
+        });
+    } else {
+        babel_traverse.default(node, {
+            ...traverseOptions,
+            enter(path: NodePath) {
+                path.skip();
+                path.traverse({
+                    enter(current: NodePath) {
+                        if (matches(current, selector, options ?? {}, path)) {
+                            visitor(current);
+                        }
+                    },
+                });
+            }
+        })
+    }
 }
 
-export function query(path: NodePath, selector: string | Selector, options?: QueryOptions): NodePath[] {
+export function query(
+    node: NodePath | Node,
+    selector: string | Selector,
+    options?: QueryOptions,
+    scope?: Scope,
+    parentPath?: NodePath,
+): NodePath[] {
     if (typeof selector === 'string') {
         selector = parse(selector);
     }
 
     const matches: NodePath[] = [];
-    traverse(path, selector, (path) => matches.push(path), options ?? {});
+    traverse(node, selector, (path) => matches.push(path), options);
 
     return matches;
 }

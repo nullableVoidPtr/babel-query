@@ -1,6 +1,6 @@
 {
   "name": "babylon-query-demo",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "main": "main.js",
   "license": "MIT",
   "type": "module",
@@ -12,7 +12,7 @@
   "dependencies": {
     "@babel/parser": "^7.18.13",
     "@babel/traverse": "^7.18.13",
-    "babylon-query": "^0.0.1",
+    "babylon-query": "^0.0.4",
     "monaco-editor": "^0.34.0"
   },
   "devDependencies": {

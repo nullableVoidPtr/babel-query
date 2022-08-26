@@ -4,7 +4,7 @@ import monacoEditorPlugin from 'vite-plugin-monaco-editor';
 export default defineConfig({
   plugins: [
     (monacoEditorPlugin as any).default({
-      languageWorkers: ["editorWorkerService", "typescript"],
+      languageWorkers: ["typescript"],
     }),
   ],
   base: '/babylon-query/',
@@ -12,6 +12,11 @@ export default defineConfig({
     "process.env": {},
     "process.platform": "'browser'",
     "Buffer.isBuffer": "(() => false)",
+  },
+  server: {
+    fs: {
+      allow: ['..'],
+    }
   },
   build: {
     rollupOptions: {

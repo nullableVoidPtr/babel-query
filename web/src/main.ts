@@ -1,6 +1,6 @@
 import { monaco } from "./monaco";
 import { parse } from "@babel/parser";
-import traverse, { NodePath } from "@babel/traverse";
+import { NodePath } from "@babel/traverse";
 import * as babylon_query from "babylon-query";
 import { renderQuery, renderESNode } from "./render";
 
@@ -106,12 +106,7 @@ function onQueryChange() {
   const parsed = parse(jsCode);
 
   let results: NodePath[] | undefined;
-  (import.meta.env.DEV ? traverse : (traverse as any).default)(parsed, {
-    Program(path: NodePath) {
-      results = babylon_query.query(path, query);
-      path.stop();
-    },
-  });
+  results = babylon_query.query(parsed, query);
 
   if (!results) {
     return;
