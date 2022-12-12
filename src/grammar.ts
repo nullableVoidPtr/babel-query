@@ -277,7 +277,6 @@ const grammar: Grammar = {
         d =>  new RegExp(d[1].join(""), d[3] ?? "")
         },
     {"name": "pseudoSelector$subexpression$1", "symbols": ["root"]},
-    {"name": "pseudoSelector$subexpression$1", "symbols": ["class"]},
     {"name": "pseudoSelector$subexpression$1", "symbols": ["logicalSelector"]},
     {"name": "pseudoSelector$subexpression$1", "symbols": ["firstChild"]},
     {"name": "pseudoSelector$subexpression$1", "symbols": ["lastChild"]},
@@ -289,24 +288,6 @@ const grammar: Grammar = {
     {"name": "root", "symbols": ["root$string$1"], "postprocess": 
         () => ({
         	type: "root",
-        })
-        },
-    {"name": "class$subexpression$1$string$1", "symbols": [{"literal":"s"}, {"literal":"t"}, {"literal":"a"}, {"literal":"t"}, {"literal":"e"}, {"literal":"m"}, {"literal":"e"}, {"literal":"n"}, {"literal":"t"}], "postprocess": (d) => d.join('')},
-    {"name": "class$subexpression$1", "symbols": ["class$subexpression$1$string$1"]},
-    {"name": "class$subexpression$1$string$2", "symbols": [{"literal":"e"}, {"literal":"x"}, {"literal":"p"}, {"literal":"r"}, {"literal":"e"}, {"literal":"s"}, {"literal":"s"}, {"literal":"i"}, {"literal":"o"}, {"literal":"n"}], "postprocess": (d) => d.join('')},
-    {"name": "class$subexpression$1", "symbols": ["class$subexpression$1$string$2"]},
-    {"name": "class$subexpression$1$string$3", "symbols": [{"literal":"d"}, {"literal":"e"}, {"literal":"c"}, {"literal":"l"}, {"literal":"a"}, {"literal":"r"}, {"literal":"a"}, {"literal":"t"}, {"literal":"i"}, {"literal":"o"}, {"literal":"n"}], "postprocess": (d) => d.join('')},
-    {"name": "class$subexpression$1", "symbols": ["class$subexpression$1$string$3"]},
-    {"name": "class$subexpression$1$string$4", "symbols": [{"literal":"f"}, {"literal":"u"}, {"literal":"n"}, {"literal":"c"}, {"literal":"t"}, {"literal":"i"}, {"literal":"o"}, {"literal":"n"}], "postprocess": (d) => d.join('')},
-    {"name": "class$subexpression$1", "symbols": ["class$subexpression$1$string$4"]},
-    {"name": "class$subexpression$1$string$5", "symbols": [{"literal":"p"}, {"literal":"a"}, {"literal":"t"}, {"literal":"t"}, {"literal":"e"}, {"literal":"r"}, {"literal":"n"}], "postprocess": (d) => d.join('')},
-    {"name": "class$subexpression$1", "symbols": ["class$subexpression$1$string$5"]},
-    {"name": "class$subexpression$1$string$6", "symbols": [{"literal":"s"}, {"literal":"c"}, {"literal":"o"}, {"literal":"p"}, {"literal":"e"}], "postprocess": (d) => d.join('')},
-    {"name": "class$subexpression$1", "symbols": ["class$subexpression$1$string$6"]},
-    {"name": "class", "symbols": ["class$subexpression$1"], "postprocess": 
-        ([[name]]) => ({
-        	type: "class",
-        	name,
         })
         },
     {"name": "nthExpr$ebnf$1$subexpression$1", "symbols": ["integer"]},

@@ -12,7 +12,7 @@
   "dependencies": {
     "@babel/parser": "^7.18.13",
     "@babel/traverse": "^7.18.13",
-    "babylon-query": "^0.0.5",
+    "babylon-query": "^0.0.6",
     "monaco-editor": "^0.34.0"
   },
   "devDependencies": {

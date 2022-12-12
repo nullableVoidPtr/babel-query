@@ -102,6 +102,11 @@ export interface OnlyChildPseudoSelector {
     type: "only-child";
 }
 
+// internal-only
+export interface SubjectPseudoSelector {
+    type: "subject";
+}
+
 export type PseudoSelector =
     RootPseudoSelector |
     ClassPseudoSelector |
@@ -109,7 +114,8 @@ export type PseudoSelector =
     NotPseudoSelector |
     HasPseudoSelector |
     NthChildPseudoSelector |
-    OnlyChildPseudoSelector;
+    OnlyChildPseudoSelector |
+    SubjectPseudoSelector;
 
 export type Selector =
     ListSelector |

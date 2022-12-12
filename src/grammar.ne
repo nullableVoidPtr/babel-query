@@ -205,7 +205,6 @@ regex -> "/" [^/]:+ "/" flags:? {%
 
 pseudoSelector -> ":" (
 	root |
-	class |
 	logicalSelector |
 	firstChild |
 	lastChild |
@@ -217,19 +216,6 @@ pseudoSelector -> ":" (
 root -> "root" {%
 	() => ({
 		type: "root",
-	})
-%}
-
-class -> (
-    "statement"
-  | "expression"
-  | "declaration"
-  | "function"
-  | "pattern"
-  | "scope") {%
-	([[name]]) => ({
-		type: "class",
-		name,
 	})
 %}
 

@@ -8,7 +8,7 @@ Selector types:
 * [Wildcard](https://www.w3.org/TR/selectors-4/#the-universal-selector) `*`
 * [Negation](https://www.w3.org/TR/selectors-4/#negation) `:not(Identifier, ExpressionStatement)`
 * [Matches-Any](https://www.w3.org/TR/selectors-4/#matches) `:is(Identifier, ExpressionStatement)`
-* [Relational](https://www.w3.org/TR/selectors-4/#relational) `:has(> Identiier.id)`
+* [Relational](https://www.w3.org/TR/selectors-4/#relational) `:has(> Identifier.id)`
 * Ancestry `CallStatement.body:is(BlockStatement).body.0`
 * Attribute
 * Root path `:root`

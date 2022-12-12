@@ -39,7 +39,7 @@ monaco.languages.setMonarchTokensProvider("babelQuery", {
 
 const queryEditorContainer = document.getElementById("query-editor")!;
 const queryEditor = monaco.editor.create(queryEditorContainer, {
-  value: ":function[id.name='foo'] IfStatement ExpressionStatement.consequent:is(BlockStatement).body.1 CallExpression:has(> Identifier[name='baz'])",
+  value: "Function[id.name='foo'] IfStatement ExpressionStatement.consequent:is(BlockStatement).body.1 CallExpression:has(> Identifier[name='baz'])",
   language: "babelQuery",
   theme: "vs-dark",
   wordWrap: "off",

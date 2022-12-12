@@ -85,7 +85,7 @@ export function renderQuery(query: Selector): HTMLElement {
         case 'has':
             for (const {combinator, selector} of query.list) {
                 const child = renderQuery(selector);
-                if (child.tagName === "details") {
+                if (child.tagName === "DETAILS") {
                     child.querySelector("summary")!.appendChild(document.createTextNode(" " + combinator));
                 } else {
                     child.innerText += " " + combinator;

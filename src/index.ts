@@ -1,7 +1,7 @@
-import * as nearley from 'nearley';
+import nearley from 'nearley';
 import SelectorGrammar from './grammar.js';
-import { Selector } from './selector.js';
-import { Node } from '@babel/types';
+import { ComplexSelector, Selector, SubjectPseudoSelector } from './selector.js';
+import { Node, isType } from '@babel/types';
 import babel_traverse, { NodePath, Scope, TraverseOptions } from '@babel/traverse';
 
 export function parse(selector: string): Selector {
@@ -28,7 +28,7 @@ export interface QueryOptions {
     denylist?: (Node["type"])[];
 }
 
-function matches(path: NodePath, selector: Selector, options: QueryOptions, root?: NodePath): boolean {
+function matches(path: NodePath, selector: Selector, options: QueryOptions, root?: NodePath, subject?: NodePath): boolean {
     if (!root) {
         root = path;
     }
@@ -37,68 +37,50 @@ function matches(path: NodePath, selector: Selector, options: QueryOptions, root
         case 'wildcard':
             return true;
         case 'type':
-            return path.type === selector.name;
+            return isType(path.type, selector.name);
         case 'list':
             return selector.list.some(
-                s => matches(path, s, options, root)
+                s => matches(path, s, options, root, subject)
             );
         case 'compound':
             return selector.list.every(
-                s => matches(path, s, options, root)
+                s => matches(path, s, options, root, subject)
             );
         case 'complex':
             switch (selector.combinator) {
                 case 'sibling':
                     const prevSiblings = path.getAllPrevSiblings();
                     return prevSiblings.length !== 0 &&
-                        matches(path, selector.right, options, root) &&
+                        matches(path, selector.right, options, root, subject) &&
                         prevSiblings.some(
-                            p => matches(p, selector.left, options, root)
+                            p => matches(p, selector.left, options, root, subject)
                         );
                 case 'adjacent':
                     const prevSibling = path.getPrevSibling();
                     return prevSibling &&
-                        matches(path, selector.right, options, root) &&
-                        matches(prevSibling, selector.left, options, root);
+                        matches(path, selector.right, options, root, subject) &&
+                        matches(prevSibling, selector.left, options, root, subject);
                 case 'child':
                     const parentPath = path.parentPath;
                     return parentPath !== null &&
-                        matches(path, selector.right, options, root) &&
-                        matches(parentPath, selector.left, options, root);
+                        matches(path, selector.right, options, root, subject) &&
+                        matches(parentPath, selector.left, options, root, subject);
                 case 'descendant':
                     const ancestry = path.getAncestry().slice(1);
-                    if (matches(path, selector.right, options, root)) {
-                        console.log(selector, ancestry)
-                    }
                     return ancestry.length !== 0 &&
-                        matches(path, selector.right, options, root) &&
+                        matches(path, selector.right, options, root, subject) &&
                         ancestry.some(
-                            p => matches(p, selector.left, options, root)
+                            p => matches(p, selector.left, options, root, subject)
                         );
             }
         case 'root':
             return path === root;
-        case 'class':
-            switch (selector.name) {
-                case 'statement':
-                    return path.isStatement();
-                case 'expression':
-                    return path.isExpression();
-                case 'declaration':
-                    return path.isDeclaration();
-                case 'function':
-                    return path.isFunction();
-                case 'pattern':
-                    return path.isPattern();
-                case 'scope':
-                    return path.isScope();
-            }
         case 'only-child':
             return path.inList && (path.container as object[]).length === 1;
         case 'not':
-            return !matches(path, selector.argument, options);
+            return !matches(path, selector.argument, options, undefined, subject);
         case 'is':
-            return matches(path, selector.argument, options);
+            return matches(path, selector.argument, options, undefined, subject);
         case 'has':
             return selector.list.some(s => {
                 switch (s.combinator) {
@@ -106,22 +88,34 @@ function matches(path: NodePath, selector: Selector, options: QueryOptions, root
                         const nextSiblings = path.getAllNextSiblings();
                         return nextSiblings.length !== 0 &&
                             nextSiblings.some(
-                                p => matches(p, s.selector, options, root)
+                                p => matches(p, s.selector, options, root, path)
                             );
                     case 'adjacent':
                         const nextSibling = path.getNextSibling();
                         return nextSibling &&
-                            matches(nextSibling, s.selector, options, root);
+                            matches(nextSibling, s.selector, options, root, path);
                     case 'child':
                     case 'descendant':
                         let matched = false;
+                        let selector = structuredClone(s.selector);
+                        if (s.combinator == 'child') {
+                            let current = selector;
+                            while (current.type == 'complex') {
+                                current = current.left;
+                            }
+
+                            current.left = <ComplexSelector>{
+                                type: 'complex',
+                                combinator: 'child',
+                                left: <SubjectPseudoSelector>{
+                                    type: 'subject',
+                                },
+                                right: current.left
+                            }
+                        }
                         path.traverse({
                             enter(p) {
-                                if (s.combinator === 'child') {
-                                    p.skip();
-                                }
-
-                                if (matches(p, s.selector, options, root)) {
+                                if (matches(p, selector, options, root, path)) {
                                     matched = true;
                                     p.stop();
                                 }
@@ -255,7 +249,11 @@ function matches(path: NodePath, selector: Selector, options: QueryOptions, root
 
                     return value.includes(right as string);
             }
+        case 'subject':
+            return path === subject;
     }
+
+    throw new Error("Unknown selector type");
 }
 
 export function traverse(
@@ -264,6 +262,7 @@ export function traverse(
     visitor: (path: NodePath) => void,
     options?: QueryOptions,
     scope?: Scope,
+    state?: any,
     parentPath?: NodePath,
 ) {
     const traverseOptions: TraverseOptions = {};
@@ -304,7 +303,7 @@ export function traverse(
                     },
                 });
             }
-        })
+        }, scope, state, parentPath);
     }
 }
 

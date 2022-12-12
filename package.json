@@ -1,6 +1,6 @@
 {
   "name": "babylon-query",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "@babel/traverse compatible esquery port",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -9,14 +9,14 @@
   "author": "nullableVoidPtr",
   "license": "MIT",
   "devDependencies": {
-    "@babel/types": "^7.18.10",
-    "@types/babel__core": "^7.1.19",
-    "@types/babel__traverse": "^7.18.0",
+    "@types/babel__core": "^7.1.20",
+    "@types/babel__traverse": "^7.18.3",
     "@types/nearley": "^2.11.2",
     "typescript": "^4.7.4"
   },
   "dependencies": {
     "@babel/traverse": "^7.18.13",
+    "@babel/types": "^7.20.5",
     "nearley": "^2.20.1"
   },
   "peerDependencies": {
