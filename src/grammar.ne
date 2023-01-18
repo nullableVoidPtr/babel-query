@@ -36,8 +36,9 @@ relativeCombinator -> _ "~" _ {% () => "sibling" %}
                     | _ ">" _ {% () => "child" %}
 
 combinator -> relativeCombinator {% id %}
-		    |   " " _ {% () => "descendant" %}
+		    |   " "  _ {% () => "descendant" %}
 		    |   "\n" _ {% () => "descendant" %}
+		    |   "\t" _ {% () => "descendant" %}
 
 selector -> sequence {% d => d[0] %}
           | selector combinator sequence {%
@@ -56,7 +57,7 @@ selector -> sequence {% d => d[0] %}
 			}
 		  %}
 
-_ -> [ \n]:* {% _ => null %}
+_ -> [ \n\t]:* {% _ => null %}
 
 sequence -> startAtom:? specifierAtom:* {%
 	([startAtom, specifierAtoms], _, reject) => {

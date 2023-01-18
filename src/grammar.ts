@@ -70,6 +70,7 @@ const grammar: Grammar = {
     {"name": "combinator", "symbols": ["relativeCombinator"], "postprocess": id},
     {"name": "combinator", "symbols": [{"literal":" "}, "_"], "postprocess": () => "descendant"},
     {"name": "combinator", "symbols": [{"literal":"\n"}, "_"], "postprocess": () => "descendant"},
+    {"name": "combinator", "symbols": [{"literal":"\t"}, "_"], "postprocess": () => "descendant"},
     {"name": "selector", "symbols": ["sequence"], "postprocess": d => d[0]},
     {"name": "selector", "symbols": ["selector", "combinator", "sequence"], "postprocess": 
         		  	([left, combinator, right], _, reject) => {
@@ -87,7 +88,7 @@ const grammar: Grammar = {
         }
         		  },
     {"name": "_$ebnf$1", "symbols": []},
-    {"name": "_$ebnf$1", "symbols": ["_$ebnf$1", /[ \n]/], "postprocess": (d) => d[0].concat([d[1]])},
+    {"name": "_$ebnf$1", "symbols": ["_$ebnf$1", /[ \n\t]/], "postprocess": (d) => d[0].concat([d[1]])},
     {"name": "_", "symbols": ["_$ebnf$1"], "postprocess": _ => null},
     {"name": "sequence$ebnf$1", "symbols": ["startAtom"], "postprocess": id},
     {"name": "sequence$ebnf$1", "symbols": [], "postprocess": () => null},
