@@ -28,7 +28,7 @@ export interface QueryOptions {
     denylist?: (Node["type"])[];
 }
 
-function matches(path: NodePath, selector: Selector, options: QueryOptions, root?: NodePath, subject?: NodePath): boolean {
+export function matches(path: NodePath, selector: Selector, options: QueryOptions, root?: NodePath, subject?: NodePath): boolean {
     if (!root) {
         root = path;
     }
@@ -97,20 +97,24 @@ function matches(path: NodePath, selector: Selector, options: QueryOptions, root
                     case 'child':
                     case 'descendant':
                         let matched = false;
-                        let selector = structuredClone(s.selector);
+                        const selector = <Selector>structuredClone(s.selector);
                         if (s.combinator == 'child') {
-                            let current = selector;
-                            while (current.type == 'complex') {
-                                current = current.left;
-                            }
+                            if (selector.type == 'complex') {
+                                let parent: ComplexSelector = selector;
+                                let current: Selector = selector.left;
+                                if (current.type == 'complex') {
+                                    parent = current;
+                                    current = current.left;
+                                }
 
-                            current.left = <ComplexSelector>{
-                                type: 'complex',
-                                combinator: 'child',
-                                left: <SubjectPseudoSelector>{
-                                    type: 'subject',
-                                },
-                                right: current.left
+                                parent.left = <ComplexSelector>{
+                                    type: 'complex',
+                                    combinator: 'child',
+                                    left: <SubjectPseudoSelector>{
+                                        type: 'subject',
+                                    },
+                                    right: current
+                                }
                             }
                         }
                         path.traverse({
@@ -125,7 +129,7 @@ function matches(path: NodePath, selector: Selector, options: QueryOptions, root
                 }
             });
         case 'ancestry':
-            if (!matches(path, selector.subject, options, root)) {
+            if (!matches(path, selector.subject, options, root, subject)) {
                 return false;
             }
 
@@ -140,7 +144,7 @@ function matches(path: NodePath, selector: Selector, options: QueryOptions, root
                     return false;
                 }
                 if (specifier &&
-                    !matches(currentNodePath, specifier, options, root)) {
+                    !matches(currentNodePath, specifier, options, root, subject)) {
                     return false;
                 }
 
@@ -283,6 +287,10 @@ export function traverse(
 
 
     if ('parentPath' in node) {
+        if (matches(node, selector, options ?? {}, node)) {
+            visitor(node);
+        }
+
         node.traverse({
             enter(current: NodePath) {
                 if (matches(current, selector, options ?? {}, node)) {
@@ -295,6 +303,10 @@ export function traverse(
             ...traverseOptions,
             enter(path: NodePath) {
                 path.skip();
+                if (matches(path, selector, options ?? {}, path)) {
+                    visitor(path);
+                }
+
                 path.traverse({
                     enter(current: NodePath) {
                         if (matches(current, selector, options ?? {}, path)) {

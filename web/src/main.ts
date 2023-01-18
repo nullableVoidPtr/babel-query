@@ -39,7 +39,8 @@ monaco.languages.setMonarchTokensProvider("babelQuery", {
 
 const queryEditorContainer = document.getElementById("query-editor")!;
 const queryEditor = monaco.editor.create(queryEditorContainer, {
-  value: "Function[id.name='foo'] IfStatement ExpressionStatement.consequent:is(BlockStatement).body.1 CallExpression:has(> Identifier[name='baz'])",
+  value:
+    "Function[id.name='foo'] IfStatement ExpressionStatement.consequent:is(BlockStatement).body.1 CallExpression:has(> Identifier[name='baz'])",
   language: "babelQuery",
   theme: "vs-dark",
   wordWrap: "off",
@@ -89,7 +90,7 @@ window.addEventListener("resize", (_) => {
 const queryResultContainer = document.querySelector("#selector-ast")!;
 const queryMatchesContainer = document.querySelector("#query-matches")!;
 function onQueryChange() {
-  const rawQuery = queryEditor.getModel()!.getLineContent(1);
+  const rawQuery = queryEditor.getModel()!.getLinesContent().join("\n");
   const query = babylon_query.parse(rawQuery);
   console.log(query);
 
@@ -97,7 +98,13 @@ function onQueryChange() {
   queryResultContainer.replaceChildren(rendered);
 
   const jsCode = javascriptEditor.getModel()!.getLinesContent().join("\n");
-  const parsed = parse(jsCode);
+  const parsed = parse(jsCode, {
+    allowImportExportEverywhere: true,
+    allowAwaitOutsideFunction: true,
+    allowReturnOutsideFunction: true,
+    allowSuperOutsideMethod: true,
+    allowUndeclaredExports: true,
+  });
 
   let results: NodePath[] | undefined;
   results = babylon_query.query(parsed, query);
@@ -121,7 +128,7 @@ function onQueryChange() {
                 start.line,
                 start.column + 1,
                 end.line,
-                end.column + 1,
+                end.column + 1
               ),
               options: {
                 inlineClassName: "highlighted",
