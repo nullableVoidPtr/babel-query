@@ -1,6 +1,6 @@
 {
   "name": "babylon-query",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "@babel/traverse compatible esquery port",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

@@ -28,7 +28,11 @@ export interface QueryOptions {
     denylist?: (Node["type"])[];
 }
 
-export function matches(path: NodePath, selector: Selector, options: QueryOptions, root?: NodePath, subject?: NodePath): boolean {
+export function matches(path: NodePath, selector: Selector, options?: QueryOptions, root?: NodePath, subject?: NodePath): boolean {
+    if (!options) {
+        options = {};
+    }
+
     if (!root) {
         root = path;
     }
@@ -97,24 +101,31 @@ export function matches(path: NodePath, selector: Selector, options: QueryOption
                     case 'child':
                     case 'descendant':
                         let matched = false;
-                        const selector = <Selector>structuredClone(s.selector);
-                        if (s.combinator == 'child') {
-                            if (selector.type == 'complex') {
-                                let parent: ComplexSelector = selector;
-                                let current: Selector = selector.left;
-                                if (current.type == 'complex') {
-                                    parent = current;
-                                    current = current.left;
-                                }
+                        let selector = <Selector>structuredClone(s.selector);
+                        if (selector.type == 'complex') {
+                            let parent: ComplexSelector = selector;
+                            let current: Selector = selector.left;
+                            while (current.type == 'complex') {
+                                parent = current;
+                                current = current.left;
+                            }
 
-                                parent.left = <ComplexSelector>{
-                                    type: 'complex',
-                                    combinator: 'child',
-                                    left: <SubjectPseudoSelector>{
-                                        type: 'subject',
-                                    },
-                                    right: current
-                                }
+                            parent.left = <ComplexSelector>{
+                                type: 'complex',
+                                combinator: s.combinator,
+                                left: <SubjectPseudoSelector>{
+                                    type: 'subject',
+                                },
+                                right: current,
+                            }
+                        } else {
+                            selector = <ComplexSelector>{
+                                type: 'complex',
+                                combinator: s.combinator,
+                                left: <SubjectPseudoSelector>{
+                                    type: 'subject',
+                                },
+                                right: selector,
                             }
                         }
                         path.traverse({
